@@ -6,8 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-const NotificationCenter = () => {
-  const [notifications, setNotifications] = useState([
+interface Notification {
+  id: string;
+  type: 'attendance_session' | 'class_joined' | 'attendance_marked' | 'session_ended';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  priority: 'low' | 'medium' | 'high';
+}
+
+const NotificationCenter: React.FC = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
       type: 'attendance_session',
@@ -48,7 +58,7 @@ const NotificationCenter = () => {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  const markAsRead = (id) => {
+  const markAsRead = (id: string) => {
     setNotifications(prev =>
       prev.map(notification =>
         notification.id === id
@@ -64,7 +74,7 @@ const NotificationCenter = () => {
     );
   };
 
-  const getNotificationIcon = (type) => {
+  const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'attendance_session':
         return <Clock className="h-4 w-4 text-warning" />;
@@ -79,7 +89,7 @@ const NotificationCenter = () => {
     }
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: Notification['priority']) => {
     switch (priority) {
       case 'high':
         return 'border-l-destructive';

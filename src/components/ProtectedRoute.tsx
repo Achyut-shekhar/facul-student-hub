@@ -2,7 +2,12 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-const ProtectedRoute = ({ children, role }) => {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  role?: 'STUDENT' | 'FACULTY';
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, role }) => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {

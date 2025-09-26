@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
-const Login = () => {
+const Login: React.FC = () => {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ const Login = () => {
     return <Navigate to={user.role === 'FACULTY' ? '/faculty-dashboard' : '/student-dashboard'} replace />;
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -48,7 +48,7 @@ const Login = () => {
     }
   };
 
-  const handleDemoLogin = (role) => {
+  const handleDemoLogin = (role: 'FACULTY' | 'STUDENT') => {
     const demoCredentials = {
       FACULTY: { email: 'faculty@school.edu', password: 'password' },
       STUDENT: { email: 'student@school.edu', password: 'password' }

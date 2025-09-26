@@ -10,9 +10,27 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
-const StudentDashboard = () => {
+interface EnrolledClass {
+  id: string;
+  name: string;
+  facultyName: string;
+  studentsCount: number;
+  nextSession?: string;
+  attendanceRate: number;
+}
+
+interface ActiveSession {
+  id: string;
+  className: string;
+  facultyName: string;
+  startTime: string;
+  timeRemaining: string;
+  isMarked: boolean;
+}
+
+const StudentDashboard: React.FC = () => {
   const { toast } = useToast();
-  const [enrolledClasses, setEnrolledClasses] = useState([
+  const [enrolledClasses, setEnrolledClasses] = useState<EnrolledClass[]>([
     {
       id: '1',
       name: 'Computer Science 101',
@@ -31,7 +49,7 @@ const StudentDashboard = () => {
     }
   ]);
 
-  const [activeSessions, setActiveSessions] = useState([
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([
     {
       id: '1',
       className: 'Computer Science 101',
@@ -47,7 +65,7 @@ const StudentDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
   const [isAttendanceDialogOpen, setIsAttendanceDialogOpen] = useState(false);
-  const [selectedSession, setSelectedSession] = useState(null);
+  const [selectedSession, setSelectedSession] = useState<ActiveSession | null>(null);
 
   const handleJoinClass = () => {
     if (!joinCode.trim()) {
@@ -60,7 +78,7 @@ const StudentDashboard = () => {
     }
 
     // Simulate API call
-    const newClass = {
+    const newClass: EnrolledClass = {
       id: Date.now().toString(),
       name: 'New Course',
       facultyName: 'Faculty Member',
@@ -108,7 +126,7 @@ const StudentDashboard = () => {
     }
   };
 
-  const openAttendanceDialog = (session) => {
+  const openAttendanceDialog = (session: ActiveSession) => {
     setSelectedSession(session);
     setIsAttendanceDialogOpen(true);
   };

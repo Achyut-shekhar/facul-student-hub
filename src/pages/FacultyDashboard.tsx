@@ -9,9 +9,30 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-const FacultyDashboard = () => {
+interface Class {
+  id: string;
+  name: string;
+  joinCode: string;
+  studentsCount: number;
+  sessionsCount: number;
+  lastSession?: string;
+  isActive?: boolean;
+}
+
+interface AttendanceSession {
+  id: string;
+  className: string;
+  startTime: string;
+  endTime?: string;
+  attendanceCode: string;
+  presentCount: number;
+  totalStudents: number;
+  status: 'ACTIVE' | 'ENDED';
+}
+
+const FacultyDashboard: React.FC = () => {
   const { toast } = useToast();
-  const [classes, setClasses] = useState([
+  const [classes, setClasses] = useState<Class[]>([
     {
       id: '1',
       name: 'Computer Science 101',
@@ -30,7 +51,7 @@ const FacultyDashboard = () => {
     }
   ]);
 
-  const [activeSessions, setActiveSessions] = useState([
+  const [activeSessions, setActiveSessions] = useState<AttendanceSession[]>([
     {
       id: '1',
       className: 'Computer Science 101',
@@ -58,7 +79,7 @@ const FacultyDashboard = () => {
 
     const generatedCode = newClass.joinCode || `CL${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     
-    const createdClass = {
+    const createdClass: Class = {
       id: Date.now().toString(),
       name: newClass.name,
       joinCode: generatedCode,
@@ -76,10 +97,10 @@ const FacultyDashboard = () => {
     });
   };
 
-  const startAttendanceSession = (classItem) => {
+  const startAttendanceSession = (classItem: Class) => {
     const attendanceCode = `ATT${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     
-    const newSession = {
+    const newSession: AttendanceSession = {
       id: Date.now().toString(),
       className: classItem.name,
       startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -97,11 +118,11 @@ const FacultyDashboard = () => {
     });
   };
 
-  const endAttendanceSession = (sessionId) => {
+  const endAttendanceSession = (sessionId: string) => {
     setActiveSessions(prev =>
       prev.map(session =>
         session.id === sessionId
-          ? { ...session, status: 'ENDED', endTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+          ? { ...session, status: 'ENDED' as const, endTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
           : session
       )
     );
