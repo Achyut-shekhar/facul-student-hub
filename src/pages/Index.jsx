@@ -1,11 +1,13 @@
 import { Navigate } from 'react-router-dom';
-import { GraduationCap, Users, Calendar, BookOpen } from 'lucide-react';
+import { GraduationCap, Users, Calendar, BookOpen, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/enhanced-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const Index = () => {
   const { user } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   // Redirect authenticated users to their dashboard
   if (user) {
@@ -21,9 +23,24 @@ const Index = () => {
             <GraduationCap className="h-8 w-8 text-primary-foreground" />
             <h1 className="text-2xl font-bold text-primary-foreground">EduAttend</h1>
           </div>
-          <Button variant="outline" asChild className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20">
-            <a href="/login">Sign In</a>
-          </Button>
+          <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+            <Button variant="outline" asChild className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20">
+              <a href="/login">Sign In</a>
+            </Button>
+          </div>
         </div>
       </header>
 

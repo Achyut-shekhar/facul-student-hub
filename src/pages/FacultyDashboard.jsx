@@ -9,30 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-interface Class {
-  id: string;
-  name: string;
-  joinCode: string;
-  studentsCount: number;
-  sessionsCount: number;
-  lastSession?: string;
-  isActive?: boolean;
-}
-
-interface AttendanceSession {
-  id: string;
-  className: string;
-  startTime: string;
-  endTime?: string;
-  attendanceCode: string;
-  presentCount: number;
-  totalStudents: number;
-  status: 'ACTIVE' | 'ENDED';
-}
-
-const FacultyDashboard: React.FC = () => {
+const FacultyDashboard = () => {
   const { toast } = useToast();
-  const [classes, setClasses] = useState<Class[]>([
+  const [classes, setClasses] = useState([
     {
       id: '1',
       name: 'Computer Science 101',
@@ -51,7 +30,7 @@ const FacultyDashboard: React.FC = () => {
     }
   ]);
 
-  const [activeSessions, setActiveSessions] = useState<AttendanceSession[]>([
+  const [activeSessions, setActiveSessions] = useState([
     {
       id: '1',
       className: 'Computer Science 101',
@@ -79,7 +58,7 @@ const FacultyDashboard: React.FC = () => {
 
     const generatedCode = newClass.joinCode || `CL${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     
-    const createdClass: Class = {
+    const createdClass = {
       id: Date.now().toString(),
       name: newClass.name,
       joinCode: generatedCode,
@@ -97,10 +76,10 @@ const FacultyDashboard: React.FC = () => {
     });
   };
 
-  const startAttendanceSession = (classItem: Class) => {
+  const startAttendanceSession = (classItem) => {
     const attendanceCode = `ATT${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
     
-    const newSession: AttendanceSession = {
+    const newSession = {
       id: Date.now().toString(),
       className: classItem.name,
       startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -118,11 +97,11 @@ const FacultyDashboard: React.FC = () => {
     });
   };
 
-  const endAttendanceSession = (sessionId: string) => {
+  const endAttendanceSession = (sessionId) => {
     setActiveSessions(prev =>
       prev.map(session =>
         session.id === sessionId
-          ? { ...session, status: 'ENDED' as const, endTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+          ? { ...session, status: 'ENDED', endTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
           : session
       )
     );
