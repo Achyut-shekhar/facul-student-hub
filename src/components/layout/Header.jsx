@@ -1,6 +1,7 @@
 import React from 'react';
-import { LogOut, User, GraduationCap } from 'lucide-react';
+import { LogOut, User, GraduationCap, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/enhanced-button';
 import NotificationCenter from '@/components/NotificationCenter';
 import {
@@ -12,8 +13,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const Header: React.FC = () => {
+const Header = () => {
   const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <header className="bg-card border-b border-border shadow-soft">
@@ -25,6 +27,20 @@ const Header: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="relative"
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5 text-yellow-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-slate-600" />
+              )}
+            </Button>
+
             {/* Notifications */}
             <NotificationCenter />
 

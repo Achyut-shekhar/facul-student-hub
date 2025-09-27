@@ -10,27 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
-interface EnrolledClass {
-  id: string;
-  name: string;
-  facultyName: string;
-  studentsCount: number;
-  nextSession?: string;
-  attendanceRate: number;
-}
-
-interface ActiveSession {
-  id: string;
-  className: string;
-  facultyName: string;
-  startTime: string;
-  timeRemaining: string;
-  isMarked: boolean;
-}
-
-const StudentDashboard: React.FC = () => {
+const StudentDashboard = () => {
   const { toast } = useToast();
-  const [enrolledClasses, setEnrolledClasses] = useState<EnrolledClass[]>([
+  const [enrolledClasses, setEnrolledClasses] = useState([
     {
       id: '1',
       name: 'Computer Science 101',
@@ -49,7 +31,7 @@ const StudentDashboard: React.FC = () => {
     }
   ]);
 
-  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([
+  const [activeSessions, setActiveSessions] = useState([
     {
       id: '1',
       className: 'Computer Science 101',
@@ -65,7 +47,7 @@ const StudentDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
   const [isAttendanceDialogOpen, setIsAttendanceDialogOpen] = useState(false);
-  const [selectedSession, setSelectedSession] = useState<ActiveSession | null>(null);
+  const [selectedSession, setSelectedSession] = useState(null);
 
   const handleJoinClass = () => {
     if (!joinCode.trim()) {
@@ -78,7 +60,7 @@ const StudentDashboard: React.FC = () => {
     }
 
     // Simulate API call
-    const newClass: EnrolledClass = {
+    const newClass = {
       id: Date.now().toString(),
       name: 'New Course',
       facultyName: 'Faculty Member',
@@ -126,7 +108,7 @@ const StudentDashboard: React.FC = () => {
     }
   };
 
-  const openAttendanceDialog = (session: ActiveSession) => {
+  const openAttendanceDialog = (session) => {
     setSelectedSession(session);
     setIsAttendanceDialogOpen(true);
   };
