@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -14,45 +14,70 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchUser = useCallback(async (token) => {
+    try {
+      const response = await fetch('/api/auth/user', {
+        headers: {
+          'auth-token': token,
+        },
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        localStorage.removeItem('token');
+      }
+    } catch (error) {
+      console.error('Failed to fetch user', error);
+      localStorage.removeItem('token');
+    }
+  }, []);
+
   useEffect(() => {
-    // Check if user is already logged in (simulate checking localStorage/session)
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUser(token);
     }
     setIsLoading(false);
-  }, []);
+  }, [fetchUser]);
 
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock users for demo
-      const mockUsers = {
-        'faculty@school.edu': {
-          id: '1',
-          name: 'Dr. John Smith',
-          email: 'faculty@school.edu',
-          role: 'FACULTY'
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        'student@school.edu': {
-          id: '2',
-          name: 'Jane Doe',
-          email: 'student@school.edu',
-          role: 'STUDENT',
-          rollNumber: '2024001'
-        }
-      };
+        body: JSON.stringify({ email, password }),
+      });
 
-      const foundUser = mockUsers[email];
-      if (foundUser && password === 'password') {
-        setUser(foundUser);
-        localStorage.setItem('user', JSON.stringify(foundUser));
+      if (response.ok) {
+        const { token } = await response.json();
+        localStorage.setItem('token', token);
+        await fetchUser(token);
         return true;
+      } else {
+        return false;
       }
+    } catch (error) {
       return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (username, email, password, role, rollNumber) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password, role, rollNumber }),
+      });
+      return response.ok;
     } catch (error) {
       return false;
     } finally {
@@ -62,11 +87,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
