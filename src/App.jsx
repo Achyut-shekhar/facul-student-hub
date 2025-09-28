@@ -7,9 +7,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "@/pages/Login";
-import Signup from "@/pages/Signup";
-import StudentSignup from "@/pages/StudentSignup";
-import FacultySignup from "@/pages/FacultySignup";
 import FacultyDashboard from "@/pages/FacultyDashboard";
 import StudentDashboard from "@/pages/StudentDashboard";
 import Index from "./pages/Index";
@@ -28,9 +25,6 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/signup/student" element={<StudentSignup />} />
-              <Route path="/signup/faculty" element={<FacultySignup />} />
               <Route 
                 path="/faculty-dashboard" 
                 element={
