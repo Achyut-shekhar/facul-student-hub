@@ -34,10 +34,10 @@ const Login = () => {
 
     const success = await login(formData.email, formData.password);
     if (!success) {
-      setError('Invalid credentials. Try faculty@school.edu or student@school.edu with password "password"');
+      setError('Invalid credentials. Use faculty@school.edu or student@school.edu with password "password"');
       toast({
         title: "Login Failed",
-        description: "Please check your credentials and try again.",
+        description: "Please use faculty@school.edu or student@school.edu with password 'password'",
         variant: "destructive"
       });
     } else {

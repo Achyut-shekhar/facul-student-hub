@@ -1,134 +1,255 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Clock, Users, CheckCircle, AlertTriangle, Code } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import { Button } from '@/components/ui/enhanced-button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Plus, Users, Code, MapPin, ClipboardList } from "lucide-react";
+import Header from "@/components/layout/Header";
+import { Button } from "@/components/ui/enhanced-button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+
+// Interactive Calendar-like Attendance View
+import { ChevronLeft, ChevronRight } from "lucide-react";
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const AttendanceCalendar = ({
+  records,
+  initialYear = 2025,
+  initialMonth = 9,
+}) => {
+  const [year, setYear] = React.useState(initialYear);
+  const [month, setMonth] = React.useState(initialMonth); // 1-based
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun, 1=Mon, ...
+  const offset = (firstDay + 6) % 7; // Monday as start
+  const weeks = [];
+  let week = [];
+
+  for (let i = 0; i < offset; i++) {
+    week.push(<div key={`empty-start-${i}`} className="h-12" />);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const status = records[day];
+    week.push(
+      <div
+        key={day}
+        className={`h-12 flex items-center justify-center rounded-lg text-sm font-medium
+          ${
+            status === "present"
+              ? "bg-green-500 text-white"
+              : status === "absent"
+              ? "bg-red-500 text-white"
+              : "bg-muted text-muted-foreground"
+          }`}
+      >
+        {day}
+      </div>
+    );
+    if (week.length === 7 || day === daysInMonth) {
+      if (day === daysInMonth && week.length < 7) {
+        for (let j = week.length; j < 7; j++) {
+          week.push(<div key={`empty-end-${j}`} className="h-12" />);
+        }
+      }
+      weeks.push(
+        <div key={`week-${day}`} className="grid grid-cols-7 gap-2">
+          {week}
+        </div>
+      );
+      week = [];
+    }
+  }
+
+  const handlePrevMonth = () => {
+    if (month === 1) {
+      setMonth(12);
+      setYear(year - 1);
+    } else {
+      setMonth(month - 1);
+    }
+  };
+  const handleNextMonth = () => {
+    if (month === 12) {
+      setMonth(1);
+      setYear(year + 1);
+    } else {
+      setMonth(month + 1);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between mb-2">
+        <button
+          onClick={handlePrevMonth}
+          className="p-1 rounded hover:bg-muted transition"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <span className="font-semibold text-lg">
+          {monthNames[month - 1]} {year}
+        </span>
+        <button
+          onClick={handleNextMonth}
+          className="p-1 rounded hover:bg-muted transition"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground">
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+        <div>Sun</div>
+      </div>
+      {weeks}
+    </div>
+  );
+};
 
 const StudentDashboard = () => {
   const { toast } = useToast();
   const [enrolledClasses, setEnrolledClasses] = useState([
     {
-      id: '1',
-      name: 'Computer Science 101',
-      facultyName: 'Dr. John Smith',
-      studentsCount: 45,
-      nextSession: '2024-01-16 10:00 AM',
-      attendanceRate: 92
+      id: "1",
+      name: "Computer Science 101",
+      facultyName: "Dr. John Smith",
+      attendanceRate: 92,
+      mode: "CODE",
     },
     {
-      id: '2',
-      name: 'Database Systems',
-      facultyName: 'Prof. Jane Doe',
-      studentsCount: 32,
-      nextSession: '2024-01-16 2:00 PM',
-      attendanceRate: 88
-    }
-  ]);
-
-  const [activeSessions, setActiveSessions] = useState([
+      id: "2",
+      name: "Database Systems",
+      facultyName: "Prof. Jane Doe",
+      attendanceRate: 88,
+      mode: "CODE",
+    },
     {
-      id: '1',
-      className: 'Computer Science 101',
-      facultyName: 'Dr. John Smith',
-      startTime: '10:00 AM',
-      timeRemaining: '25 min',
-      isMarked: false
-    }
+      id: "3",
+      name: "Operating Systems",
+      facultyName: "Dr. Alan Turing",
+      attendanceRate: 75,
+      mode: "MANUAL",
+    },
   ]);
-
-  const [joinCode, setJoinCode] = useState('');
-  const [attendanceCode, setAttendanceCode] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [joinCode, setJoinCode] = useState("");
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
-  const [isAttendanceDialogOpen, setIsAttendanceDialogOpen] = useState(false);
-  const [selectedSession, setSelectedSession] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const [codeDialogOpen, setCodeDialogOpen] = useState(false);
+  const [enteredCode, setEnteredCode] = useState("");
+  const [endedClassIds, setEndedClassIds] = useState([]);
 
   const handleJoinClass = () => {
     if (!joinCode.trim()) {
       toast({
         title: "Validation Error",
         description: "Please enter a join code.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-
-    // Simulate API call
     const newClass = {
       id: Date.now().toString(),
-      name: 'New Course',
-      facultyName: 'Faculty Member',
-      studentsCount: 1,
-      attendanceRate: 0
+      name: "New Course",
+      facultyName: "Faculty Member",
+      attendanceRate: 0,
+      mode: "CODE",
     };
-
     setEnrolledClasses([...enrolledClasses, newClass]);
-    setJoinCode('');
+    setJoinCode("");
     setIsJoinDialogOpen(false);
-    
     toast({
       title: "Successfully Joined",
-      description: "You have been enrolled in the class."
+      description: "You have been enrolled in the class.",
     });
   };
 
-  const handleMarkAttendance = () => {
-    if (!attendanceCode.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Please enter the attendance code.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleViewDetails = (classItem) => {
+    setSelectedClass(classItem);
+    setDetailsOpen(true);
+  };
 
-    if (selectedSession) {
-      setActiveSessions(prev =>
-        prev.map(session =>
-          session.id === selectedSession.id
-            ? { ...session, isMarked: true }
-            : session
-        )
-      );
-
-      setAttendanceCode('');
-      setIsAttendanceDialogOpen(false);
-      setSelectedSession(null);
-      
+  const handleCodeSubmit = () => {
+    if (selectedClass && enteredCode === "1234") {
+      setEndedClassIds((prev) => [...prev, selectedClass.id]);
       toast({
         title: "Attendance Marked",
-        description: "Your attendance has been recorded successfully."
+        description: "Code accepted successfully!",
+      });
+      toast({
+        title: "Class Ended",
+        description: `${selectedClass.name} has ended.`,
+      });
+    } else {
+      toast({
+        title: "Invalid Code",
+        description: "Please check the code and try again.",
+        variant: "destructive",
       });
     }
+    setEnteredCode("");
+    setCodeDialogOpen(false);
   };
 
-  const openAttendanceDialog = (session) => {
-    setSelectedSession(session);
-    setIsAttendanceDialogOpen(true);
+  const sampleRecords = {
+    1: "present",
+    2: "absent",
+    3: "present",
+    5: "absent",
+    6: "present",
+    9: "present",
+    12: "absent",
+    15: "present",
+    20: "present",
+    25: "absent",
   };
-
-  const filteredClasses = enrolledClasses.filter(cls =>
-    cls.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
+        {/* Header + Join */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Your classes and attendance</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Student Dashboard
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Your classes and attendance
+            </p>
           </div>
-          
           <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="hero" className="flex items-center space-x-2">
@@ -143,20 +264,21 @@ const StudentDashboard = () => {
                   Enter the join code provided by your instructor
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="joinCode">Join Code</Label>
-                  <Input
-                    id="joinCode"
-                    placeholder="e.g., CS101A"
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                    className="font-mono"
-                  />
-                </div>
+              <div className="space-y-2 py-4">
+                <Label htmlFor="joinCode">Join Code</Label>
+                <Input
+                  id="joinCode"
+                  placeholder="e.g., CS101A"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  className="font-mono"
+                />
               </div>
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsJoinDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsJoinDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button variant="default" onClick={handleJoinClass}>
@@ -167,109 +289,82 @@ const StudentDashboard = () => {
           </Dialog>
         </div>
 
-        {/* Active Sessions Alert */}
-        {activeSessions.length > 0 && (
-          <Alert className="mb-8 border-l-4 border-l-warning bg-warning/5">
-            <AlertTriangle className="h-4 w-4 text-warning" />
-            <AlertDescription className="text-warning-foreground">
-              <strong>Attendance sessions are active!</strong> Mark your attendance before they expire.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Active Sessions */}
-        {activeSessions.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-warning" />
-              Active Sessions
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeSessions.map((session) => (
-                <Card key={session.id} className="border-l-4 border-l-warning shadow-medium">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{session.className}</CardTitle>
-                      <Badge variant={session.isMarked ? "default" : "secondary"} className={session.isMarked ? "bg-success text-success-foreground" : "bg-warning/20 text-warning-foreground"}>
-                        {session.isMarked ? 'MARKED' : 'PENDING'}
-                      </Badge>
-                    </div>
-                    <CardDescription>{session.facultyName}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Started:</span>
-                      <span>{session.startTime}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Time left:</span>
-                      <span className="text-warning font-semibold">{session.timeRemaining}</span>
-                    </div>
-                    {session.isMarked ? (
-                      <div className="flex items-center text-sm text-success">
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Attendance marked
-                      </div>
-                    ) : (
-                      <Button
-                        variant="premium"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => openAttendanceDialog(session)}
-                      >
-                        <Code className="h-4 w-4 mr-2" />
-                        Mark Attendance
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Search */}
-        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search your classes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {/* Enrolled Classes */}
+        {/* Classes */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Your Classes</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredClasses.map((classItem) => (
-              <Card key={classItem.id} className="shadow-medium hover:shadow-large transition-all duration-300">
+            {enrolledClasses.map((classItem) => (
+              <Card
+                key={classItem.id}
+                className="shadow-medium hover:shadow-large transition-all duration-300"
+              >
                 <CardHeader>
-                  <CardTitle className="text-lg">{classItem.name}</CardTitle>
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{classItem.name}</CardTitle>
+                    <Badge variant="secondary">
+                      {classItem.attendanceRate}%
+                    </Badge>
+                  </div>
                   <CardDescription>{classItem.facultyName}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Attendance Method */}
+                  <div className="space-y-2">
+                    {endedClassIds.includes(classItem.id) ? (
+                      <div className="p-2 text-center text-muted-foreground border rounded-md font-semibold">
+                        Class Ended
+                      </div>
+                    ) : (
+                      <>
+                        {classItem.mode === "CODE" && (
+                          <Button
+                            className="w-full"
+                            onClick={() => {
+                              setSelectedClass(classItem);
+                              setCodeDialogOpen(true);
+                            }}
+                          >
+                            <Code className="h-4 w-4 mr-2" />
+                            Enter Code
+                          </Button>
+                        )}
+
+                      </>
+                    )}
+                    {classItem.mode === "MANUAL" && (
+                      <div className="p-2 text-center text-muted-foreground border rounded-md">
+                        <ClipboardList className="inline h-4 w-4 mr-1" />
+                        Faculty taking manual attendance
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stats */}
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{classItem.studentsCount} students</span>
+                      <span>50 students</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className={`h-2 w-2 rounded-full ${classItem.attendanceRate >= 90 ? 'bg-success' : classItem.attendanceRate >= 70 ? 'bg-warning' : 'bg-destructive'}`} />
-                      <span>{classItem.attendanceRate}% attendance</span>
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          classItem.attendanceRate >= 90
+                            ? "bg-green-500"
+                            : classItem.attendanceRate >= 70
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                      />
+                      <span>{classItem.attendanceRate}% rate</span>
                     </div>
                   </div>
-                  
-                  {classItem.nextSession && (
-                    <p className="text-xs text-muted-foreground">
-                      Next: {classItem.nextSession}
-                    </p>
-                  )}
 
-                  <Button variant="outline" size="sm" className="w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleViewDetails(classItem)}
+                  >
                     View Details
                   </Button>
                 </CardContent>
@@ -278,57 +373,58 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        {filteredClasses.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-lg font-medium">No classes found</p>
-            <p className="text-muted-foreground">Join your first class to get started</p>
-          </div>
-        )}
-      </div>
-
-      {/* Attendance Marking Dialog */}
-      <Dialog open={isAttendanceDialogOpen} onOpenChange={setIsAttendanceDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mark Attendance</DialogTitle>
-            <DialogDescription>
-              Enter the attendance code displayed by your instructor
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {selectedSession && (
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="font-medium">{selectedSession.className}</p>
-                <p className="text-sm text-muted-foreground">{selectedSession.facultyName}</p>
-              </div>
+        {/* Details Dialog */}
+        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+          <DialogContent className="max-w-3xl">
+            {selectedClass && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>
+                    {selectedClass.name} - Attendance Records
+                  </DialogTitle>
+                  <DialogDescription>
+                    Red = Absent, Green = Present
+                  </DialogDescription>
+                </DialogHeader>
+                <AttendanceCalendar records={sampleRecords} />
+              </>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="attendanceCode">Attendance Code</Label>
+          </DialogContent>
+        </Dialog>
+
+        {/* Enter Code Dialog */}
+        <Dialog open={codeDialogOpen} onOpenChange={setCodeDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Enter Attendance Code</DialogTitle>
+              <DialogDescription>
+                Enter the code provided by your instructor
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Label htmlFor="attendanceCode">Code</Label>
               <Input
                 id="attendanceCode"
-                placeholder="e.g., ATT123"
-                value={attendanceCode}
-                onChange={(e) => setAttendanceCode(e.target.value.toUpperCase())}
-                className="font-mono text-center text-lg"
-                maxLength={6}
+                placeholder="e.g., 1234"
+                value={enteredCode}
+                onChange={(e) => setEnteredCode(e.target.value)}
+                className="font-mono"
               />
             </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => {
-              setIsAttendanceDialogOpen(false);
-              setAttendanceCode('');
-              setSelectedSession(null);
-            }}>
-              Cancel
-            </Button>
-            <Button variant="success" onClick={handleMarkAttendance}>
-              Mark Present
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setCodeDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="default" onClick={handleCodeSubmit}>
+                Submit
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

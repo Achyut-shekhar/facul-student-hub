@@ -126,3 +126,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+.day-present {
+    background-color: hsl(var(--success) / 0.2);
+    color: hsl(var(--success));
+}
+.day-present:hover {
+    background-color: hsl(var(--success) / 0.3);
+}
+
+.day-absent {
+    background-color: hsl(var(--destructive) / 0.2);
+    color: hsl(var(--destructive));
+}
+.day-absent:hover {
+    background-color: hsl(var(--destructive) / 0.3);
+}
