@@ -9,7 +9,7 @@ export default defineConfig(() => ({
     port: 8080,
     historyApiFallback: true,
     proxy: {
-      '/api': 'http://localhost:3001'
+      "/api": "http://localhost:3001",
     },
   },
   plugins: [react()],

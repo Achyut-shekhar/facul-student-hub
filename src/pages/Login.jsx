@@ -1,44 +1,60 @@
-import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { GraduationCap, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/enhanced-button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { GraduationCap, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/enhanced-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const { login, user, isLoading } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   if (user) {
-    return <Navigate to={user.role === 'FACULTY' ? '/faculty-dashboard' : '/student-dashboard'} replace />;
+    return (
+      <Navigate
+        to={
+          user.role === "FACULTY" ? "/faculty-dashboard" : "/student-dashboard"
+        }
+        replace
+      />
+    );
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     const success = await login(formData.email, formData.password);
     if (!success) {
-      setError('Invalid credentials. Use faculty@school.edu or student@school.edu with password "password"');
+      setError(
+        'Invalid credentials. Use faculty@school.edu or student@school.edu with password "password"'
+      );
       toast({
         title: "Login Failed",
-        description: "Please use faculty@school.edu or student@school.edu with password 'password'",
-        variant: "destructive"
+        description:
+          "Please use faculty@school.edu or student@school.edu with password 'password'",
+        variant: "destructive",
       });
     } else {
       toast({
@@ -50,10 +66,10 @@ const Login = () => {
 
   const handleDemoLogin = (role) => {
     const demoCredentials = {
-      FACULTY: { email: 'faculty@school.edu', password: 'password' },
-      STUDENT: { email: 'student@school.edu', password: 'password' }
+      FACULTY: { email: "faculty@school.edu", password: "password" },
+      STUDENT: { email: "student@school.edu", password: "password" },
     };
-    
+
     setFormData(demoCredentials[role]);
   };
 
@@ -70,7 +86,7 @@ const Login = () => {
               Attendance Management System
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
@@ -89,7 +105,9 @@ const Login = () => {
                       type="email"
                       placeholder="Enter your email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className="pl-10"
                       required
                     />
@@ -102,10 +120,12 @@ const Login = () => {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
                       className="pl-10 pr-10"
                       required
                     />
@@ -130,7 +150,7 @@ const Login = () => {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
@@ -142,7 +162,7 @@ const Login = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleDemoLogin('FACULTY')}
+                  onClick={() => handleDemoLogin("FACULTY")}
                   className="text-xs"
                 >
                   Faculty Demo
@@ -150,7 +170,7 @@ const Login = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleDemoLogin('STUDENT')}
+                  onClick={() => handleDemoLogin("STUDENT")}
                   className="text-xs"
                 >
                   Student Demo

@@ -328,7 +328,6 @@ const StudentDashboard = () => {
                             Enter Code
                           </Button>
                         )}
-
                       </>
                     )}
                     {classItem.mode === "MANUAL" && (

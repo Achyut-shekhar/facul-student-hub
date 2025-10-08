@@ -207,8 +207,6 @@ const FacultyDashboard = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
 
-
-
   // Load classes from API
   useEffect(() => {
     const loadClasses = async () => {
@@ -224,7 +222,7 @@ const FacultyDashboard = () => {
         setClasses([]);
       }
     };
-    
+
     loadClasses();
   }, []);
 
@@ -251,7 +249,8 @@ const FacultyDashboard = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create class. Please try again.",
+        description:
+          error.message || "Failed to create class. Please try again.",
         variant: "destructive",
       });
     }

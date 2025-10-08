@@ -1,7 +1,7 @@
-import { getDistance } from 'geolib';
-import AttendanceSession from '../models/AttendanceSession.js';
-import AttendanceRecord from '../models/AttendanceRecord.js';
-import Class from '../models/Class.js';
+import { getDistance } from "geolib";
+import AttendanceSession from "../models/AttendanceSession.js";
+import AttendanceRecord from "../models/AttendanceRecord.js";
+import Class from "../models/Class.js";
 
 // Generate a random attendance code
 const generateAttendanceCode = () => {
@@ -17,24 +17,28 @@ export const startSession = async (req, res) => {
     const classExists = await Class.findOne({
       where: {
         id: classId,
-        facultyId: req.user.id
-      }
+        facultyId: req.user.id,
+      },
     });
 
     if (!classExists) {
-      return res.status(404).json({ message: 'Class not found or unauthorized' });
+      return res
+        .status(404)
+        .json({ message: "Class not found or unauthorized" });
     }
 
     // Check if there's already an active session
     const activeSession = await AttendanceSession.findOne({
       where: {
         classId,
-        status: 'ACTIVE'
-      }
+        status: "ACTIVE",
+      },
     });
 
     if (activeSession) {
-      return res.status(400).json({ message: 'An active session already exists for this class' });
+      return res
+        .status(400)
+        .json({ message: "An active session already exists for this class" });
     }
 
     // Create new session
@@ -43,12 +47,14 @@ export const startSession = async (req, res) => {
       attendanceCode: generateAttendanceCode(),
       attendanceMethod: method,
       location: location,
-      startTime: new Date()
+      startTime: new Date(),
     });
 
     res.status(201).json(session);
   } catch (error) {
-    res.status(500).json({ message: 'Error starting session', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error starting session", error: error.message });
   }
 };
 
@@ -58,18 +64,20 @@ export const endSession = async (req, res) => {
     const { sessionId } = req.params;
 
     const session = await AttendanceSession.findByPk(sessionId);
-    
+
     if (!session) {
-      return res.status(404).json({ message: 'Session not found' });
+      return res.status(404).json({ message: "Session not found" });
     }
 
-    session.status = 'ENDED';
+    session.status = "ENDED";
     session.endTime = new Date();
     await session.save();
 
     res.json(session);
   } catch (error) {
-    res.status(500).json({ message: 'Error ending session', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error ending session", error: error.message });
   }
 };
 
@@ -82,30 +90,34 @@ export const markAttendanceWithCode = async (req, res) => {
     const session = await AttendanceSession.findOne({
       where: {
         id: sessionId,
-        status: 'ACTIVE',
-        attendanceMethod: 'CODE'
-      }
+        status: "ACTIVE",
+        attendanceMethod: "CODE",
+      },
     });
 
     if (!session) {
-      return res.status(404).json({ message: 'No active code-based session found' });
+      return res
+        .status(404)
+        .json({ message: "No active code-based session found" });
     }
 
     if (session.attendanceCode !== code) {
-      return res.status(400).json({ message: 'Invalid attendance code' });
+      return res.status(400).json({ message: "Invalid attendance code" });
     }
 
     const record = await AttendanceRecord.create({
       sessionId,
       studentId,
-      status: 'PRESENT',
+      status: "PRESENT",
       markedAt: new Date(),
-      verificationMethod: 'CODE'
+      verificationMethod: "CODE",
     });
 
     res.status(201).json(record);
   } catch (error) {
-    res.status(500).json({ message: 'Error marking attendance', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error marking attendance", error: error.message });
   }
 };
 
@@ -118,37 +130,46 @@ export const markAttendanceWithLocation = async (req, res) => {
     const session = await AttendanceSession.findOne({
       where: {
         id: sessionId,
-        status: 'ACTIVE',
-        attendanceMethod: 'LOCATION'
-      }
+        status: "ACTIVE",
+        attendanceMethod: "LOCATION",
+      },
     });
 
     if (!session) {
-      return res.status(404).json({ message: 'No active location-based session found' });
+      return res
+        .status(404)
+        .json({ message: "No active location-based session found" });
     }
 
     // Check if student is within range (50 meters)
     const distance = getDistance(
       { latitude: location.latitude, longitude: location.longitude },
-      { latitude: session.location.latitude, longitude: session.location.longitude }
+      {
+        latitude: session.location.latitude,
+        longitude: session.location.longitude,
+      }
     );
 
     if (distance > 50) {
-      return res.status(400).json({ message: 'You are too far from the class location' });
+      return res
+        .status(400)
+        .json({ message: "You are too far from the class location" });
     }
 
     const record = await AttendanceRecord.create({
       sessionId,
       studentId,
-      status: 'PRESENT',
+      status: "PRESENT",
       markedAt: new Date(),
-      verificationMethod: 'LOCATION',
-      location
+      verificationMethod: "LOCATION",
+      location,
     });
 
     res.status(201).json(record);
   } catch (error) {
-    res.status(500).json({ message: 'Error marking attendance', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error marking attendance", error: error.message });
   }
 };
 
@@ -160,30 +181,32 @@ export const markAttendanceManually = async (req, res) => {
     const session = await AttendanceSession.findOne({
       where: {
         id: sessionId,
-        attendanceMethod: 'MANUAL'
-      }
+        attendanceMethod: "MANUAL",
+      },
     });
 
     if (!session) {
-      return res.status(404).json({ message: 'Session not found' });
+      return res.status(404).json({ message: "Session not found" });
     }
 
     // Mark attendance for each student
     const records = await Promise.all(
-      studentIds.map(studentId =>
+      studentIds.map((studentId) =>
         AttendanceRecord.create({
           sessionId,
           studentId,
-          status: 'PRESENT',
+          status: "PRESENT",
           markedAt: new Date(),
-          verificationMethod: 'MANUAL'
+          verificationMethod: "MANUAL",
         })
       )
     );
 
     res.status(201).json(records);
   } catch (error) {
-    res.status(500).json({ message: 'Error marking attendance', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error marking attendance", error: error.message });
   }
 };
 
@@ -194,15 +217,22 @@ export const getSessionAttendance = async (req, res) => {
 
     const records = await AttendanceRecord.findAll({
       where: { sessionId },
-      include: [{
-        model: User,
-        as: 'student',
-        attributes: ['id', 'name', 'email']
-      }]
+      include: [
+        {
+          model: User,
+          as: "student",
+          attributes: ["id", "name", "email"],
+        },
+      ],
     });
 
     res.json(records);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching attendance records', error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching attendance records",
+        error: error.message,
+      });
   }
 };

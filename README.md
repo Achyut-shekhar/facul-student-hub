@@ -1,79 +1,207 @@
-# EduAttend - Attendance Management System
+# EduAttend - Faculty Student Attendance Management System
 
-A modern, responsive attendance management system designed for educational institutions with real-time tracking and seamless integration capabilities.
+A modern web application for managing student attendance with real-time updates and multiple attendance marking methods.
 
 ## Features
 
-- **Real-time Attendance Tracking**: Monitor student attendance in real-time
-- **Role-based Access Control**: Separate dashboards for faculty and students
-- **Modern UI/UX**: Clean, intuitive interface built with React and Tailwind CSS
-- **Responsive Design**: Works seamlessly across desktop and mobile devices
-- **Secure Authentication**: Protected routes and user authentication
-- **Notification System**: Real-time notifications and alerts
+- **User Authentication**
 
-## Technologies Used
+  - Role-based access (Faculty/Student)
+  - Secure JWT-based authentication
+  - Protected routes and API endpoints
 
-This project is built with:
+- **Faculty Features**
 
-- **Vite** - Fast build tool and development server
-- **React** - Modern JavaScript library for building user interfaces
-- **JavaScript** - Core programming language
-- **shadcn/ui** - Beautiful, accessible UI components
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **React Query** - Data fetching and state management
-- **Radix UI** - Low-level UI primitives
+  - Create and manage classes
+  - Generate unique join codes for classes
+  - Start/end attendance sessions
+  - View attendance records and statistics
+  - Manage student enrollments
+
+- **Student Features**
+  - Join classes using unique codes
+  - Mark attendance using verification codes
+  - View attendance history and statistics
+  - Real-time session notifications
+
+## Tech Stack
+
+### Frontend
+
+- React with Vite
+- TailwindCSS
+- Shadcn UI components
+- React Query for data fetching
+- React Router for navigation
+
+### Backend
+
+- Node.js with Express
+- JWT for authentication
+- In-memory data store
+- RESTful API architecture
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (version 16 or higher)
-- npm or yarn package manager
+- Node.js (v14 or higher)
+- npm (v6 or higher)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <YOUR_REPOSITORY_URL>
-   cd facul-student-hub-1
-   ```
+1. Clone the repository:
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+git clone https://github.com/Achyut-shekhar/facul-student-hub.git
+cd facul-student-hub
+```
 
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+2. Install dependencies:
 
-4. **Open your browser**
-   Navigate to `http://localhost:8080` to view the application.
+```bash
+# Install frontend dependencies
+npm install
 
-## Available Scripts
+# Install backend dependencies
+cd backend
+npm install
+cd ..
+```
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build the project for production
-- `npm run build:dev` - Build the project in development mode
-- `npm run lint` - Run ESLint to check for code issues
-- `npm run preview` - Preview the production build locally
+### Running the Application
+
+There are multiple ways to run the application. Choose the method that works best for your workflow:
+
+#### Option 1: Using the PowerShell Script (Recommended for Windows)
+
+This method automatically handles process cleanup and starts both servers:
+
+```powershell
+.\start-dev.ps1
+```
+
+#### Option 2: Using npm Concurrent Script
+
+Run both servers using the concurrent script:
+
+```bash
+npm run start:dev
+```
+
+#### Option 3: Running Servers Separately
+
+If you need to run the servers independently:
+
+1. Start the Backend Server:
+
+```bash
+cd backend
+npm run dev    # Runs with nodemon for development
+# or
+npm start      # Runs without auto-reload
+```
+
+2. Start the Frontend Server (in a new terminal):
+
+```bash
+npm run frontend    # Starts Vite dev server
+```
+
+#### Development Ports
+
+The application will be available at:
+
+- Frontend: http://localhost:8080 (Vite)
+- Backend API: http://localhost:3001 (Express)
+
+#### Stopping the Servers
+
+- If using PowerShell script: The script handles cleanup automatically
+- If running manually: Use Ctrl+C in each terminal window
+- If processes are stuck: Run `taskkill /F /IM node.exe` (Windows) or `pkill node` (Unix)
+
+### Test Credentials
+
+#### Faculty Account
+
+- Email: faculty@school.edu
+- Password: password
+
+#### Student Account
+
+- Email: student@school.edu
+- Password: password
 
 ## Project Structure
 
 ```
-src/
-├── components/          # Reusable UI components
-│   ├── ui/             # shadcn/ui components
-│   ├── layout/         # Layout components
-│   └── ...
-├── contexts/           # React contexts for state management
-├── hooks/              # Custom React hooks
-├── lib/                # Utility functions
-├── pages/              # Page components
-└── main.jsx           # Application entry point
+facul-student-hub/
+├── backend/                # Backend server code
+│   ├── src/
+│   │   ├── controllers/   # Request handlers
+│   │   ├── middleware/    # Express middleware
+│   │   ├── routes/       # API route definitions
+│   │   ├── store/        # In-memory data store
+│   │   └── index.js      # Server entry point
+│   └── package.json
+│
+├── src/                   # Frontend source code
+│   ├── components/        # React components
+│   │   ├── ui/           # Shadcn UI components
+│   │   ├── layout/       # Layout components
+│   │   └── attendance/   # Attendance related components
+│   ├── contexts/         # React contexts
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Utility functions
+│   ├── pages/            # Page components
+│   ├── services/         # API services
+│   └── main.jsx         # Frontend entry point
+│
+├── public/               # Static assets
+├── start-dev.ps1        # Development startup script
+└── package.json
 ```
+
+## API Endpoints
+
+### Authentication
+
+- POST `/api/auth/login` - User login
+- GET `/api/auth/me` - Get current user
+
+### Faculty Routes
+
+- GET `/api/faculty/classes` - Get faculty's classes
+- POST `/api/faculty/classes` - Create a new class
+- POST `/api/faculty/classes/:classId/sessions` - Start attendance session
+- PUT `/api/faculty/classes/:classId/sessions/:sessionId/end` - End attendance session
+
+### Student Routes
+
+- GET `/api/student/classes` - Get enrolled classes
+- POST `/api/student/classes/join` - Join a class using code
+- POST `/api/student/attendance` - Mark attendance
+
+## Development
+
+### Directory Structure Details
+
+- `backend/src/controllers/` - Business logic
+- `backend/src/middleware/` - Custom middleware (auth, error handling)
+- `backend/src/routes/` - API route definitions
+- `backend/src/store/` - In-memory data store and helper functions
+- `src/components/` - Reusable React components
+- `src/contexts/` - React context providers
+- `src/services/` - API integration services
+
+### Available Scripts
+
+- `npm run frontend` - Run frontend only
+- `npm run backend` - Run backend only
+- `npm run start:dev` - Run both frontend and backend
+- `npm run build` - Build frontend for production
+- `npm run preview` - Preview production build
 
 ## Deployment
 

@@ -4,8 +4,8 @@ import {
   startAttendanceSession,
   endAttendanceSession,
   findClassById,
-  getActiveSession
-} from '../store/index.js';
+  getActiveSession,
+} from "../store/index.js";
 
 // Create a new class
 export const createClass = (req, res) => {
@@ -19,7 +19,7 @@ export const createClass = (req, res) => {
     name,
     joinCode,
     facultyId,
-    createdAt: new Date()
+    createdAt: new Date(),
   });
 
   res.status(201).json(newClass);
@@ -40,17 +40,22 @@ export const startSession = (req, res) => {
   // Verify faculty owns the class
   const classData = findClassById(classId);
   if (!classData || classData.facultyId !== facultyId) {
-    return res.status(404).json({ message: 'Class not found or unauthorized' });
+    return res.status(404).json({ message: "Class not found or unauthorized" });
   }
 
   // Check if there's already an active session
   const activeSession = getActiveSession(classId);
   if (activeSession) {
-    return res.status(400).json({ message: 'An active session already exists for this class' });
+    return res
+      .status(400)
+      .json({ message: "An active session already exists for this class" });
   }
 
   // Generate attendance code
-  const attendanceCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const attendanceCode = Math.random()
+    .toString(36)
+    .substring(2, 6)
+    .toUpperCase();
 
   // Start new session
   const session = startAttendanceSession(classId, attendanceCode);
@@ -65,12 +70,12 @@ export const endSession = (req, res) => {
   // Verify faculty owns the class
   const classData = findClassById(classId);
   if (!classData || classData.facultyId !== facultyId) {
-    return res.status(404).json({ message: 'Class not found or unauthorized' });
+    return res.status(404).json({ message: "Class not found or unauthorized" });
   }
 
   const session = endAttendanceSession(classId);
   if (!session) {
-    return res.status(404).json({ message: 'No active session found' });
+    return res.status(404).json({ message: "No active session found" });
   }
 
   res.json(session);
@@ -81,7 +86,7 @@ export const getSessionAttendance = (req, res) => {
   const { classId } = req.params;
   const session = getActiveSession(classId);
   if (!session) {
-    return res.status(404).json({ message: 'No active session found' });
+    return res.status(404).json({ message: "No active session found" });
   }
   res.json(session);
 };

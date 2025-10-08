@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json.schemastore.org/package",
   "name": "facul-student-hub-backend",
   "version": "1.0.0",
   "description": "Backend for faculty student attendance management system",
